@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: docker.2d.lol/postgres:latest
+    container_name: magnetico-postgres
+    environment:
+      POSTGRES_USER: magnetico
+      POSTGRES_PASSWORD: magnetico
+      POSTGRES_DB: magnetico
+    volumes:
+      - /share/数据库类/dth:/var/lib/postgresql/data
+      - /share/数据库类/dth-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  magnetico:
+    image: ghcr.io/tgragnato/magnetico:latest
+    container_name: magnetico
+    ports:
+      - "8888:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - postgres
+    command: >
+      --addr=0.0.0.0:8080
+      --database=postgres://magnetico:magnetico@postgres:5432/magnetico?sslmode=disable
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
